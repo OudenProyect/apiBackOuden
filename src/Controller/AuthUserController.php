@@ -34,7 +34,7 @@ class AuthUserController extends AbstractController
     }
 
     #[Route('/auth/login', name: 'app_auth_login', methods:'POST')]
-    public function login(Request $request,UserRepository $repo,UserPasswordHasherInterface $hash): JsonResponse
+    public function login(Request $request,UserRepository $repo): JsonResponse
     {
         $data = json_decode($request->getContent());
         $exits = $repo->searchUser($data->email);

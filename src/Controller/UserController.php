@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Flex\Response as FlexResponse;
 
@@ -39,38 +40,65 @@ class UserController extends AbstractController
     }
 
     #[Route('/profile/edit' ,name:'profile.edit', methods:'PUT')]
-    public function edit(UserRepository $repo, Request $req): Response
+    public function edit(UserRepository $repo, Request $req): JsonResponse
     {
         $name= null;
 
         try{
             $data = json_decode($req->getContent(),true);
-
-            // Siempre se recibira el dato edit
-
-            switch($data['edit']){
-                case 'name':
-                    $name = "name edcion";
-                    break;
-                case 'email':
-                    $name = "email";
-                    break;
-                case 'img_profile':
-                    $name = "profile_ img";
-                    break;
-                case 'phone';
-                    $name = "phone";
-                    break;
-                case 'cif_company';
-                    $name = "cif_company";
-                    break;
-                default:
-                    $name = "Error";
-    
+            $user = $repo->find($data['id']);
+            if($user){
+                // Siempre se recibira el dato edit
+                switch($data['edit']){
+                    case 'name':
+                        $user->setName($data['value']);
+                        break;
+                    case 'email':
+                        $user->setEmail($data['value']);
+                        break;
+                    case 'img_profile':
+                        $user->setImgProfile($data['value']);
+                        break;
+                    case 'phone';
+                        $user->setPhone((int)$data['value']);
+                        break;
+                    case 'cif_company';
+                        $user->setCifCompany($data['value']);
+                        break;
+                    default:
+                        $name = "No se recibio el campo a cambiar";
+                }
+                $repo->save($user,true);
+                $name = $user;
+            }else{
+                $name = "usuario no encontrado";
             }
+            
         }catch(\Exception $e){
             $e->getMessage();
         }
-        return new Response($name);
+
+        return $this->json($name);
+    }
+
+    #[Route('/changeUserPwd', name: 'app_change_pass',methods:'PUT')]
+    public function changeUserPwd(Request $request,UserRepository $repo,UserPasswordHasherInterface $hash): JsonResponse
+    {
+        // recibimos id usuario y contraseña actual para validar el cambio
+        // y luego hasheamos la nueva contraseña
+        $data = json_decode($request->getContent());
+        $pass = $data->password;
+        $new_pass = $data->new_pass;
+        $user = $repo->find((int)$data->id);
+
+        if (!password_verify($pass,$user->getPassword())) {
+            $message = "La contraseña no es valida";
+        }else{
+            $hashed =$hash->hashPassword($user,$new_pass);
+            $user->setPassword($hashed);
+            $repo->save($user,true);
+            $message = "Contraseña cambiada";
+        }
+        return $this->json($message);
     }
 }
