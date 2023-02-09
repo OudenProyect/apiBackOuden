@@ -49,24 +49,29 @@ class UserController extends AbstractController
             $user = $repo->find($data['id']);
             if($user){
                 // Siempre se recibira el dato edit
-                switch($data['edit']){
-                    case 'name':
-                        $user->setName($data['value']);
-                        break;
-                    case 'email':
-                        $user->setEmail($data['value']);
-                        break;
-                    case 'img_profile':
-                        $user->setImgProfile($data['value']);
-                        break;
-                    case 'phone';
-                        $user->setPhone((int)$data['value']);
-                        break;
-                    case 'cif_company';
-                        $user->setCifCompany($data['value']);
-                        break;
-                    default:
-                        $name = "No se recibio el campo a cambiar";
+                if(isset($data['value'])){
+                    switch($data['edit']){
+                        case 'name':
+                            $user->setName($data['value']);
+                            break;
+                        case 'email':
+                            
+                            $user->setEmail($data['value']);
+                            break;
+                        case 'img_profile':
+                            $user->setImgProfile($data['value']);
+                            break;
+                        case 'phone';
+                            $user->setPhone((int)$data['value']);
+                            break;
+                        case 'cif_company';
+                            $user->setCifCompany($data['value']);
+                            break;
+                        default:
+                            $name = "No se recibio el campo a cambiar";
+                    }
+                }else{
+                    $name = "El campo esta vacio";
                 }
                 $repo->save($user,true);
                 $name = $user;
