@@ -13,54 +13,48 @@ use Symfony\Flex\Response as FlexResponse;
 
 class UserController extends AbstractController
 {
-    #[Route('/delete/{id}' ,name:'delete.user', methods:'DELETE')]
+    #[Route('/delete/{id}', name: 'delete.user', methods: 'DELETE')]
     public function deleteUser(UserRepository $repo, int $id): JsonResponse
     {
         $user = $repo->find($id);
         $message = "usuario no encontrado";
-        if($user != null){
-            $repo->remove($user,true);
+        if ($user != null) {
+            $repo->remove($user, true);
             $message = "usuario eliminado";
         }
         return $this->json($message);
     }
 
-    #[Route('/profile/{id}' ,name:'profile.user', methods:'GET')]
+    #[Route('/profile/{id}', name: 'profile.user', methods: 'GET')]
     public function profile(UserRepository $repo, int $id): JsonResponse
     {
-        try{
+        try {
             $user = $repo->find($id);
-            if($user == null){
+            if ($user == null) {
                 $user = "usuario no encontrado";
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $e->getMessage();
         }
         return $this->json($user);
     }
 
-    #[Route('/profile/edit' ,name:'profile.edit', methods:'PUT')]
+    #[Route('/api/profile/edit', name: 'profile.edit', methods: 'PUT')]
     public function edit(UserRepository $repo, Request $req): JsonResponse
     {
-        $name= null;
+        $name = null;
 
-        try{
-            $data = json_decode($req->getContent(),true);
+        try {
+            $data = json_decode($req->getContent(), true);
             $user = $repo->find($data['id']);
-            if($user){
+            if ($user) {
                 // Siempre se recibira el dato edit
-                if(isset($data['value'])){
-                    switch($data['edit']){
+                if (isset($data['value'])) {
+                    switch ($data['edit']) {
                         case 'name':
                             $user->setName($data['value']);
                             break;
-                        case 'email':
-                            
-                            $user->setEmail($data['value']);
-                            break;
-                        case 'img_profile':
-                            $user->setImgProfile($data['value']);
-                            break;
+
                         case 'phone';
                             $user->setPhone((int)$data['value']);
                             break;
@@ -70,24 +64,23 @@ class UserController extends AbstractController
                         default:
                             $name = "No se recibio el campo a cambiar";
                     }
-                }else{
+                } else {
                     $name = "El campo esta vacio";
                 }
-                $repo->save($user,true);
+                $repo->save($user, true);
                 $name = $user;
-            }else{
+            } else {
                 $name = "usuario no encontrado";
             }
-            
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $e->getMessage();
         }
 
         return $this->json($name);
     }
 
-    #[Route('/changeUserPwd', name: 'app_change_pass',methods:'PUT')]
-    public function changeUserPwd(Request $request,UserRepository $repo,UserPasswordHasherInterface $hash): JsonResponse
+    #[Route('/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
+    public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash): JsonResponse
     {
         // recibimos id usuario y contraseña actual para validar el cambio
         // y luego hasheamos la nueva contraseña
@@ -96,12 +89,12 @@ class UserController extends AbstractController
         $new_pass = $data->new_pass;
         $user = $repo->find((int)$data->id);
 
-        if (!password_verify($pass,$user->getPassword())) {
+        if (!password_verify($pass, $user->getPassword())) {
             $message = "La contraseña no es valida";
-        }else{
-            $hashed =$hash->hashPassword($user,$new_pass);
+        } else {
+            $hashed = $hash->hashPassword($user, $new_pass);
             $user->setPassword($hashed);
-            $repo->save($user,true);
+            $repo->save($user, true);
             $message = "Contraseña cambiada";
         }
         return $this->json($message);
