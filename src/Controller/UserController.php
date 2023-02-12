@@ -25,6 +25,8 @@ class UserController extends AbstractController
         return $this->json($message);
     }
 
+    // esta ruta era inicialmente para traer informacion del usuario pero el token
+    // como trae la informacion se la coge desde ella
     #[Route('/profile/{id}', name: 'profile.user', methods: 'GET')]
     public function profile(UserRepository $repo, int $id): JsonResponse
     {
