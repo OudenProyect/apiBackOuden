@@ -10,39 +10,40 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class AuthUserController extends AbstractController
 {
-    #[Route('/auth/user', name: 'app_auth_user')]
-    public function index(): Response
+    // ruta para coger al usuario por el token
+    #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
+    public function index(TokenStorageInterface $tokenStorage): JsonResponse
     {
-        return dd("ohla");
+        return $this->json([
+            'user' => $tokenStorage->getToken()->getUser()
+        ]);
     }
 
-    #[Route('/signin', name: 'app_auth_user',methods:'POST')]
-    public function register(Request $request,UserRepository $repo,UserPasswordHasherInterface $hash): JsonResponse
+    // creacion nuevo usuario
+    #[Route('/signin', name: 'app_auth_user', methods: 'POST')]
+    public function register(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash): JsonResponse
     {
-        $data = json_decode($request->getContent());
-        $user  = new User();
-        $user->setName($data->name);
-        $user->setEmail($data->email);
-        $user->setRoles([]);
-        $hashed =$hash->hashPassword($user,$data->password);
-        $user->setPassword($hashed);
-        $repo->save($user,true);
-        return $this->json($user);
-    }
+        try {
+            $data = json_decode($request->getContent());
+            $codigo = Response::HTTP_BAD_REQUEST;
 
-    #[Route('/auth/login', name: 'app_auth_login', methods:'POST')]
-    public function login(Request $request,UserRepository $repo): JsonResponse
-    {
-        $data = json_decode($request->getContent());
-        $exits = $repo->searchUser($data->email);
-        if(count($exits) <= 0){
-            $exits = "usuario no encontrado";
+            $user  = new User();
+            $user->setName($data->usuario);
+            $user->setEmail($data->email);
+            $user->setRoles([]);
+            $hashed = $hash->hashPassword($user, $data->password);
+            $user->setPassword($hashed);
+            $repo->save($user, true);
+            $codigo = Response::HTTP_OK;
+        } catch (\Exception $e) {
+            $user = "El email ya esta registrado";
         }
-        
-        return $this->json($exits);
+
+        return $this->json($user, $codigo);
     }
 
 }
