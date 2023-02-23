@@ -40,15 +40,14 @@ class Publication
     #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Comment::class, orphanRemoval: true)]
     private Collection $comments;
 
-    #[ORM\OneToOne(inversedBy: 'publication', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Location $location = null;
-
     #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Video::class)]
     private Collection $videos;
 
     #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Image::class, orphanRemoval: true)]
     private Collection $images;
+
+    #[ORM\OneToOne(inversedBy: 'publication', cascade: ['persist', 'remove'])]
+    private ?House $House = null;
 
     public function __construct()
     {
@@ -180,18 +179,6 @@ class Publication
         return $this;
     }
 
-    public function getLocation(): ?Location
-    {
-        return $this->location;
-    }
-
-    public function setLocation(Location $location): self
-    {
-        $this->location = $location;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Video>
      */
@@ -248,6 +235,18 @@ class Publication
                 $image->setPublication(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHouse(): ?House
+    {
+        return $this->House;
+    }
+
+    public function setHouse(?House $House): self
+    {
+        $this->House = $House;
 
         return $this;
     }

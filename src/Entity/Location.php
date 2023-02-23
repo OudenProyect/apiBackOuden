@@ -31,7 +31,7 @@ class Location
     private ?string $postal_code = null;
 
     #[ORM\OneToOne(mappedBy: 'location', cascade: ['persist', 'remove'])]
-    private ?Publication $publication = null;
+    private ?House $house = null;
 
     public function getId(): ?int
     {
@@ -98,19 +98,19 @@ class Location
         return $this;
     }
 
-    public function getPublication(): ?Publication
+    public function getHouse(): ?House
     {
-        return $this->publication;
+        return $this->house;
     }
 
-    public function setPublication(Publication $publication): self
+    public function setHouse(House $house): self
     {
         // set the owning side of the relation if necessary
-        if ($publication->getLocation() !== $this) {
-            $publication->setLocation($this);
+        if ($house->getLocation() !== $this) {
+            $house->setLocation($this);
         }
 
-        $this->publication = $publication;
+        $this->house = $house;
 
         return $this;
     }

@@ -47,6 +47,14 @@ class House
     #[ORM\ManyToMany(targetEntity: Feature::class, inversedBy: 'houses')]
     private Collection $feature;
 
+    #[ORM\OneToOne(mappedBy: 'House', cascade: ['persist', 'remove'])]
+    private ?Publication $publication = null;
+
+    #[ORM\OneToOne(inversedBy: 'publication', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Location $location = null;
+
+
     public function __construct()
     {
         $this->feature = new ArrayCollection();
@@ -165,6 +173,20 @@ class House
         return $this;
     }
 
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(Location $location): self
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+
     /**
      * @return Collection<int, Feature>
      */
@@ -185,6 +207,28 @@ class House
     public function removeFeature(Feature $feature): self
     {
         $this->feature->removeElement($feature);
+
+        return $this;
+    }
+
+    public function getPublication(): ?Publication
+    {
+        return $this->publication;
+    }
+
+    public function setPublication(?Publication $publication): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($publication === null && $this->publication !== null) {
+            $this->publication->setHouse(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($publication !== null && $publication->getHouse() !== $this) {
+            $publication->setHouse($this);
+        }
+
+        $this->publication = $publication;
 
         return $this;
     }
