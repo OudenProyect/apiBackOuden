@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Feature;
 use App\Repository\UserRepository;
+use App\Repository\FeatureRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,5 +102,15 @@ class UserController extends AbstractController
             $message = "Contraseña cambiada";
         }
         return $this->json($message);
+    }
+
+    #[Route('/insert', name: 'app_insert', methods: 'GET')]
+    public function insert(FeatureRepository $repo)
+    {
+        $tipos = new Feature();
+        $tipos->setName('Armarios empotrados');
+        $repo->save($tipos,true); 
+
+        
     }
 }
