@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use Doctrine\ORM\Mapping\Id;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Flex\Response as FlexResponse;
 
 class UserController extends AbstractController
@@ -81,24 +83,32 @@ class UserController extends AbstractController
         return $this->json($name);
     }
 
-    #[Route('/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
-    public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash): JsonResponse
+    #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
+    public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash, TokenStorageInterface $pp): JsonResponse
     {
+        $email = $pp->getToken()->getUserIdentifier();
+        $PWD = $repo->findBy(['email'=>$email]);
+        $passwords = [];
+
+        foreach ($PWD as $user) {
+            $passwords[] = $user->getPassword();
+        }   
         // recibimos id usuario y contraseña actual para validar el cambio
         // y luego hasheamos la nueva contraseña
         $data = json_decode($request->getContent());
-        $pass = $data->password;
-        $new_pass = $data->new_pass;
-        $user = $repo->find((int)$data->id);
+        // $pass = $data->oldPassword;
+        // $new_pass = $data->newPassword;
+        // $confirm_pass = $data->confirmPassword;
+        // $user = $repo->find((int)$data->id);
 
-        if (!password_verify($pass, $user->getPassword())) {
-            $message = "La contraseña no es valida";
-        } else {
-            $hashed = $hash->hashPassword($user, $new_pass);
-            $user->setPassword($hashed);
-            $repo->save($user, true);
-            $message = "Contraseña cambiada";
-        }
-        return $this->json($message);
+        // if (!password_verify($pass, $user->getPassword())) {
+        //     $message = "La contraseña no es valida";
+        // } else {
+        //     $hashed = $hash->hashPassword($user, $new_pass);
+        //     $user->setPassword($hashed);
+        //     $repo->save($user, true);
+        //     $message = "Contraseña cambiada";
+        // }
+        return $this->json($passwords);
     }
 }
