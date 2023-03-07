@@ -27,22 +27,23 @@ class UserController extends AbstractController
         return $this->json($message);
     }
 
-    // esta ruta era inicialmente para traer informacion del usuario pero el token
-    // como trae la informacion se la coge desde ella
-    #[Route('/profile/{id}', name: 'profile.user', methods: 'GET')]
-    public function profile(UserRepository $repo, int $id): JsonResponse
-    {
-        try {
-            $user = $repo->find($id);
-            if ($user == null) {
-                $user = "usuario no encontrado";
-            }
-        } catch (\Exception $e) {
-            $e->getMessage();
-        }
-        return $this->json($user);
-    }
+    // // esta ruta era inicialmente para traer informacion del usuario pero el token
+    // // como trae la informacion se la coge desde ella
+    // #[Route('/profile/{id}', name: 'profile.user', methods: 'GET')]
+    // public function profile(UserRepository $repo, int $id): JsonResponse
+    // {
+    //     try {
+    //         $user = $repo->find($id);
+    //         if ($user == null) {
+    //             $user = "usuario no encontrado";
+    //         }
+    //     } catch (\Exception $e) {
+    //         $e->getMessage();
+    //     }
+    //     return $this->json($user);
+    // }
 
+    // ruta protegida
     #[Route('/api/profile/edit', name: 'profile.edit', methods: 'PUT')]
     public function edit(UserRepository $repo, Request $req): JsonResponse
     {
