@@ -17,7 +17,7 @@ class Publication
     #[ORM\Column]
     private ?int $id = null;
 
-    
+
     #[ORM\Column(length: 100)]
     private ?string $title = null;
 
@@ -46,8 +46,8 @@ class Publication
     #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Image::class, orphanRemoval: true)]
     private Collection $images;
 
-    #[ORM\OneToOne(inversedBy: 'publication', cascade: ['persist', 'remove'])]
-    private ?House $House = null;
+    #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
+    private ?House $house = null;
 
     public function __construct()
     {
@@ -241,12 +241,12 @@ class Publication
 
     public function getHouse(): ?House
     {
-        return $this->House;
+        return $this->house;
     }
 
-    public function setHouse(?House $House): self
+    public function setHouse(?House $house): self
     {
-        $this->House = $House;
+        $this->house = $house;
 
         return $this;
     }

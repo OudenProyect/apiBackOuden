@@ -83,7 +83,7 @@ class UserController extends AbstractController
         return $this->json($name);
     }
 
-    #[Route('/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
+    #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
     public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash): JsonResponse
     {
         // recibimos id usuario y contraseña actual para validar el cambio

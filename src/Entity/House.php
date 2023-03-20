@@ -16,8 +16,8 @@ class House
     #[ORM\Column]
     private ?int $id = null;
 
-    
-    #[ORM\Column(length: 100,columnDefinition:"enum('Rustic Property','Castle','Palace','Country house','Town House','Tower','Mansion')")]
+
+    #[ORM\Column(length: 100, columnDefinition: "enum('Rustic Property','Castle','Palace','Country house','Town House','Tower','Mansion')")]
     private ?string $type = null;
 
     #[ORM\Column]
@@ -26,13 +26,13 @@ class House
     #[ORM\Column]
     private ?int $toilets = null;
 
-    #[ORM\Column(length: 100, columnDefinition:"enum('To reform','In good condition')")]
+    #[ORM\Column(length: 100, columnDefinition: "enum('To reform','In good condition')")]
     private ?string $state = null;
 
     #[ORM\Column]
     private ?int $m2 = null;
 
-    #[ORM\Column(length: 100,columnDefinition:"enum('A','B','C','D','E','F','G','In process','External property','No data yet')")]
+    #[ORM\Column(length: 100, columnDefinition: "enum('A','B','C','D','E','F','G','In process','External property','No data yet')")]
     private ?string $energy_consum = null;
 
     #[ORM\Column(nullable: true)]
@@ -47,10 +47,7 @@ class House
     #[ORM\ManyToMany(targetEntity: Feature::class, inversedBy: 'houses')]
     private Collection $feature;
 
-    #[ORM\OneToOne(mappedBy: 'House', cascade: ['persist', 'remove'])]
-    private ?Publication $publication = null;
-
-    #[ORM\OneToOne(inversedBy: 'publication', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: Location::class, inversedBy: 'house')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Location $location = null;
 
@@ -207,28 +204,6 @@ class House
     public function removeFeature(Feature $feature): self
     {
         $this->feature->removeElement($feature);
-
-        return $this;
-    }
-
-    public function getPublication(): ?Publication
-    {
-        return $this->publication;
-    }
-
-    public function setPublication(?Publication $publication): self
-    {
-        // unset the owning side of the relation if necessary
-        if ($publication === null && $this->publication !== null) {
-            $this->publication->setHouse(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($publication !== null && $publication->getHouse() !== $this) {
-            $publication->setHouse($this);
-        }
-
-        $this->publication = $publication;
 
         return $this;
     }

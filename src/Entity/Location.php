@@ -14,7 +14,7 @@ class Location
     #[ORM\Column]
     private ?int $id = null;
 
-    
+
     #[ORM\Column(length: 255)]
     private ?string $name_via = null;
 
@@ -30,7 +30,7 @@ class Location
     #[ORM\Column(length: 5)]
     private ?string $postal_code = null;
 
-    #[ORM\OneToOne(mappedBy: 'location', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
     private ?House $house = null;
 
     public function getId(): ?int
