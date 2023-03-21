@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping\Id;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -87,29 +88,27 @@ class UserController extends AbstractController
     #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
     public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash, TokenStorageInterface $pp): JsonResponse
     {
+
+        // cogemos el usuario con el token, que devuelve el email del usuario que es como se idetifican
         $email = $pp->getToken()->getUserIdentifier();
-        $PWD = $repo->findBy(['email'=>$email]);
+        $PWD = $repo->findBy(['email' => $email]);
         $passwords = [];
+        $data = json_decode($request->getContent(), true);
+        $new_pass = $data['newPassword'];
 
         foreach ($PWD as $user) {
             $passwords[] = $user->getPassword();
-        }   
-        // recibimos id usuario y contraseña actual para validar el cambio
-        // y luego hasheamos la nueva contraseña
-        $data = json_decode($request->getContent());
-        // $pass = $data->oldPassword;
-        // $new_pass = $data->newPassword;
-        // $confirm_pass = $data->confirmPassword;
-        // $user = $repo->find((int)$data->id);
+        }
+        $message = null;
 
-        // if (!password_verify($pass, $user->getPassword())) {
-        //     $message = "La contraseña no es valida";
-        // } else {
-        //     $hashed = $hash->hashPassword($user, $new_pass);
-        //     $user->setPassword($hashed);
-        //     $repo->save($user, true);
-        //     $message = "Contraseña cambiada";
-        // }
-        return $this->json($passwords);
+        if (!password_verify($data['oldPassword'], $passwords[0])) {
+            $message = "Error";
+        } else {
+            $hashed = password_hash($new_pass, PASSWORD_BCRYPT);
+            $PWD[0]->setPassword($hashed);
+            $repo->save($PWD[0], true);
+            $message = "Contrasena cambiada";
+        }
+        return $this->json(['message' => $message]);
     }
 }
