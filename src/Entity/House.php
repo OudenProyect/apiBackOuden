@@ -48,9 +48,7 @@ class House
     private Collection $feature;
 
     #[ORM\OneToOne(targetEntity: Location::class, inversedBy: 'house')]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Location $location = null;
-
 
     public function __construct()
     {
@@ -178,6 +176,7 @@ class House
 
     public function setLocation(Location $location): self
     {
+
         $this->location = $location;
 
         return $this;
@@ -207,4 +206,26 @@ class House
 
         return $this;
     }
+
+    // public function getLoct(): ?Location
+    // {
+    //     return $this->loct;
+    // }
+
+    // public function setLoct(?Location $loct): self
+    // {
+    //     // unset the owning side of the relation if necessary
+    //     if ($loct === null && $this->loct !== null) {
+    //         $this->loct->setCasa(null);
+    //     }
+
+    //     // set the owning side of the relation if necessary
+    //     if ($loct !== null && $loct->getCasa() !== $this) {
+    //         $loct->setCasa($this);
+    //     }
+
+    //     $this->loct = $loct;
+
+    //     return $this;
+    // }
 }

@@ -105,10 +105,6 @@ class Location
 
     public function setHouse(House $house): self
     {
-        // set the owning side of the relation if necessary
-        if ($house->getLocation() !== $this) {
-            $house->setLocation($this);
-        }
 
         $this->house = $house;
 
