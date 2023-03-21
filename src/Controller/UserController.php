@@ -87,29 +87,34 @@ class UserController extends AbstractController
     #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
     public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash, TokenStorageInterface $pp): JsonResponse
     {
+
         $email = $pp->getToken()->getUserIdentifier();
         $PWD = $repo->findBy(['email'=>$email]);
         $passwords = [];
+        $data = json_decode($request->getContent());
+        $pass = $data->oldPassword;
+        $new_pass = $data->newPassword;
+        $confirm_pass = $data->confirmPassword;
+        $user = $repo->find((int)$data->id);
 
         foreach ($PWD as $user) {
             $passwords[] = $user->getPassword();
-        }   
-        // recibimos id usuario y contraseña actual para validar el cambio
-        // y luego hasheamos la nueva contraseña
-        $data = json_decode($request->getContent());
-        // $pass = $data->oldPassword;
-        // $new_pass = $data->newPassword;
-        // $confirm_pass = $data->confirmPassword;
-        // $user = $repo->find((int)$data->id);
-
+        }
+        
+        if (password_verify($pass, $passwords[0])) {
+             $message = "La contraseña es valida";
+        }else{
+            $message = "La contraseña no es valida";
+        }
+      
         // if (!password_verify($pass, $user->getPassword())) {
-        //     $message = "La contraseña no es valida";
+        //    
         // } else {
         //     $hashed = $hash->hashPassword($user, $new_pass);
         //     $user->setPassword($hashed);
         //     $repo->save($user, true);
         //     $message = "Contraseña cambiada";
         // }
-        return $this->json($passwords);
+        return $this->json($message);
     }
 }
