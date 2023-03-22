@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,6 +34,7 @@ class AuthUserController extends AbstractController
 
 
     // ruta para coger al usuario por el token
+    // las rutas protegidas inician con el prefijo /api
     #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
     public function index(TokenStorageInterface $tokenStorage): JsonResponse
     {

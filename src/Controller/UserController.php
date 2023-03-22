@@ -4,13 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Feature;
 use App\Repository\UserRepository;
-use App\Repository\FeatureRepository;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Flex\Response as FlexResponse;
 
 class UserController extends AbstractController
@@ -27,22 +28,7 @@ class UserController extends AbstractController
         return $this->json($message);
     }
 
-    // esta ruta era inicialmente para traer informacion del usuario pero el token
-    // como trae la informacion se la coge desde ella
-    #[Route('/profile/{id}', name: 'profile.user', methods: 'GET')]
-    public function profile(UserRepository $repo, int $id): JsonResponse
-    {
-        try {
-            $user = $repo->find($id);
-            if ($user == null) {
-                $user = "usuario no encontrado";
-            }
-        } catch (\Exception $e) {
-            $e->getMessage();
-        }
-        return $this->json($user);
-    }
-
+    // ruta protegida
     #[Route('/api/profile/edit', name: 'profile.edit', methods: 'PUT')]
     public function edit(UserRepository $repo, Request $req): JsonResponse
     {
@@ -84,33 +70,29 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
-    public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash): JsonResponse
+    public function changeUserPwd(Request $request, UserRepository $repo, UserPasswordHasherInterface $hash, TokenStorageInterface $pp): JsonResponse
     {
-        // recibimos id usuario y contraseña actual para validar el cambio
-        // y luego hasheamos la nueva contraseña
-        $data = json_decode($request->getContent());
-        $pass = $data->password;
-        $new_pass = $data->new_pass;
-        $user = $repo->find((int)$data->id);
 
-        if (!password_verify($pass, $user->getPassword())) {
-            $message = "La contraseña no es valida";
-        } else {
-            $hashed = $hash->hashPassword($user, $new_pass);
-            $user->setPassword($hashed);
-            $repo->save($user, true);
-            $message = "Contraseña cambiada";
+        // cogemos el usuario con el token, que devuelve el email del usuario que es como se idetifican
+        $email = $pp->getToken()->getUserIdentifier();
+        $PWD = $repo->findBy(['email' => $email]);
+        $passwords = [];
+        $data = json_decode($request->getContent(), true);
+        $new_pass = $data['newPassword'];
+
+        foreach ($PWD as $user) {
+            $passwords[] = $user->getPassword();
         }
-        return $this->json($message);
-    }
+        $message = null;
 
-    #[Route('/insert', name: 'app_insert', methods: 'GET')]
-    public function insert(FeatureRepository $repo)
-    {
-        $tipos = new Feature();
-        $tipos->setName('Armarios empotrados');
-        $repo->save($tipos,true); 
-
-        
+        if (!password_verify($data['oldPassword'], $passwords[0])) {
+            $message = "Error";
+        } else {
+            $hashed = password_hash($new_pass, PASSWORD_BCRYPT);
+            $PWD[0]->setPassword($hashed);
+            $repo->save($PWD[0], true);
+            $message = "Contrasena cambiada";
+        }
+        return $this->json(['message' => $message]);
     }
 }
