@@ -39,19 +39,20 @@ class HouseRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return House[] Returns an array of House objects
-    //  */
-    // public function location($value): array
-    // {
-    //     return $this->createQueryBuilder('h')
-    //         ->andWhere('h.exampleField = :val')
-    //         ->setParameter('val', $value)
-    //         ->orderBy('h.id', 'ASC')
-    //         ->setMaxResults(10)
-    //         ->getQuery()
-    //         ->getResult();
-    // }
+    /**
+     * @return House[] Returns an array of House objects
+     */
+    public function location($value)
+    {
+        $query = $this->createQueryBuilder(
+            'SELECT * 
+            FROM App\Entity\House houses 
+            JOIN houses.location locations 
+            WHERE locations.id = :location_id'
+        )->setParameter('location_id', $value);
+
+        return $query->getFirstResult();
+    }
 
 
     //    /**

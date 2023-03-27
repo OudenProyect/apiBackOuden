@@ -34,11 +34,6 @@ security:
       lazy: true
       provider: app_user_provider
 
-      logout:
-        path: ^/api/app_logout
-        success_handler: lexik_jwt_authentication.handler.logout_success
-        failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
       # activate different ways to authenticate
       # https://symfony.com/doc/current/security.html#the-firewall
 
