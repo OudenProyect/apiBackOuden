@@ -30,6 +30,7 @@ class Location
     #[ORM\Column(length: 5)]
     private ?string $postal_code = null;
 
+    // aun no se puede obtener la casa desde esta entidad
     #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
     private ?House $house = null;
 
