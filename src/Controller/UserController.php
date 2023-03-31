@@ -48,7 +48,9 @@ class UserController extends AbstractController
                         case 'name':
                             $user->setName($data['value']);
                             break;
-
+                        case 'nickname':
+                            $user->setNickname($data['value']);
+                            break;
                         case 'phone';
                             $user->setPhone((int)$data['value']);
                             break;
