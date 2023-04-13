@@ -30,9 +30,8 @@ class Location
     #[ORM\Column(length: 5)]
     private ?string $postal_code = null;
 
-    // aun no se puede obtener la casa desde esta entidad
-    #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
-    private ?House $house = null;
+    #[ORM\OneToOne(mappedBy: 'location', cascade: ['persist', 'remove'])]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -99,15 +98,24 @@ class Location
         return $this;
     }
 
-    public function getHouse(): ?House
+    public function getUser(): ?User
     {
-        return $this->house;
+        return $this->user;
     }
 
-    public function setHouse(House $house): self
+    public function setUser(?User $user): self
     {
+        // unset the owning side of the relation if necessary
+        if ($user === null && $this->user !== null) {
+            $this->user->setLocation(null);
+        }
 
-        $this->house = $house;
+        // set the owning side of the relation if necessary
+        if ($user !== null && $user->getLocation() !== $this) {
+            $user->setLocation($this);
+        }
+
+        $this->user = $user;
 
         return $this;
     }

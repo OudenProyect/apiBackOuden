@@ -47,12 +47,16 @@ class House
     #[ORM\ManyToMany(targetEntity: Feature::class, inversedBy: 'houses')]
     private Collection $feature;
 
-    #[ORM\OneToOne(targetEntity: Location::class, inversedBy: 'house')]
-    private ?Location $location = null;
+    #[ORM\ManyToMany(targetEntity: LocationServices::class, inversedBy: 'houses')]
+    private Collection $areaServices;
+
+    // #[ORM\OneToOne(targetEntity: Location::class, inversedBy: 'house')]
+    // private ?Location $location = null;
 
     public function __construct()
     {
         $this->feature = new ArrayCollection();
+        $this->areaServices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -168,21 +172,6 @@ class House
         return $this;
     }
 
-
-    public function getLocation(): ?Location
-    {
-        return $this->location;
-    }
-
-    public function setLocation(Location $location): self
-    {
-
-        $this->location = $location;
-
-        return $this;
-    }
-
-
     /**
      * @return Collection<int, Feature>
      */
@@ -228,4 +217,28 @@ class House
 
     //     return $this;
     // }
+
+    /**
+     * @return Collection<int, LocationServices>
+     */
+    public function getAreaServices(): Collection
+    {
+        return $this->areaServices;
+    }
+
+    public function addAreaService(LocationServices $areaService): self
+    {
+        if (!$this->areaServices->contains($areaService)) {
+            $this->areaServices->add($areaService);
+        }
+
+        return $this;
+    }
+
+    public function removeAreaService(LocationServices $areaService): self
+    {
+        $this->areaServices->removeElement($areaService);
+
+        return $this;
+    }
 }
