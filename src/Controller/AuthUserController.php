@@ -60,7 +60,7 @@ class AuthUserController extends AbstractController
             $repo->save($user, true);
             $codigo = Response::HTTP_OK;
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            $user = $e->getMessage();
             // $user = "El email ya esta registrado";
         }
 
