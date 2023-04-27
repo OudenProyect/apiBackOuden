@@ -54,6 +54,14 @@ class HouseRepository extends ServiceEntityRepository
         return $query->getFirstResult();
     }
 
+    public function getEnum(){
+        $classMetadata = $this->getEntityManager()->getClassMetadata(House::class);
+        $fieldMapping = $classMetadata->getFieldMapping('type')['columnDefinition'];
+        
+        return $fieldMapping;
+
+    }
+
 
     //    /**
     //     * @return House[] Returns an array of House objects

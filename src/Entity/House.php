@@ -16,7 +16,7 @@ class House
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100, columnDefinition: "enum('Rustic Property','Castle','Palace','Country house','Town House','Tower','Mansion')")]
+    #[ORM\Column(length: 100, columnDefinition: "enum('Chalet pareado','Chalet adosado','Apartamento','Piso','Vivienda')")]
     private ?string $type = null;
 
     #[ORM\Column]

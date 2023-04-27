@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\House;
+use App\Repository\HouseRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -12,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostController extends AbstractController
 {
     #[Route('/post', name: 'app_post', methods: 'POST')]
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, HouseRepository $houserepo): JsonResponse
     {
         $datos = [];
         try {
@@ -22,7 +24,30 @@ class PostController extends AbstractController
             if (!$uploadedFiles) {
                 throw new FileException('No se ha seleccionado ningún archivo');
             }
+            // post
+            try{
+                $titulo = $request->get('titulo');
+                $precio = $request->get('precio');
+                $descripcionPortada = $request->get('descripcionPortada');
+                $descripcion = $request->get('descripcion');
+                $tipo = $request->get('tipo');
+                $bedrooms = $request->get('bedrooms');
+                $bathroom = $request->get('bathroom');
+                $flats = $request->get('flats');
+                $m2 = $request->get('m2');
+                $m2util = $request->get('m2util');
+                $garden = $request->get('garden');
+                $balcony = $request->get('balcony');
+                $terrace = $request->get('terrace');
+                $swimmingPool = $request->get('swimmingPool');
+                $Barcelona = $request->get('Barcelona');
+                $Girona = $request->get('Girona');
 
+    
+            }catch(Exception $e){
+                $datos = $e->getMessage();
+    
+            }
             foreach ($uploadedFiles as $fieldName => $files) {
 
                 if($files->getClientOriginalExtension() != 'jpg' || $files->getClientOriginalExtension() != 'png' ){
@@ -52,24 +77,7 @@ class PostController extends AbstractController
             throw new \Exception('Ha ocurrido un error al subir el archivo'.$e->getMessage());
         }
 
-        try{
-            $itulo = $request->get('titulo');
-            $precio = $request->get('precio');
-            $descripcionPortada = $request->get('descripcionPortada');
-            $descripcion = $request->get('descripcion');
-            $tipo = $request->get('tipo');
-            $bedrooms = $request->get('bedrooms');
-            $bathroom = $request->get('bathroom');
-            $flats = $request->get('flats');
-            $m2 = $request->get('m2');
-            $m2util = $request->get('m2util');
-            $extras = $request->get('extras');
-            $ciudades = $request->get('ciudades');
 
-        }catch(Exception $e){
-            $datos = $e->getMessage();
-
-        }
 
         return $this->json($datos);
     }
