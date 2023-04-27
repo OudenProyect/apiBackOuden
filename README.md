@@ -6,8 +6,8 @@
 ### Instalación de dependencias y base de datos.
 
 - `composer install`
-- `php bin\console doctrine:database:create`
-- `php bin\console doctrine:migrations:migrate`
+- `php bin/console doctrine:database:create`
+- `php bin/console doctrine:migrations:migrate`
 
 ### Crear claves de JWT (Token)
 
