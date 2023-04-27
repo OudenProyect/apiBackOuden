@@ -49,6 +49,9 @@ class Publication
     #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
     private ?House $house = null;
 
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $details = null;
+
     public function __construct()
     {
         $this->users_favorit = new ArrayCollection();
@@ -247,6 +250,18 @@ class Publication
     public function setHouse(?House $house): self
     {
         $this->house = $house;
+
+        return $this;
+    }
+
+    public function getDetails(): ?string
+    {
+        return $this->details;
+    }
+
+    public function setDetails(string $details): self
+    {
+        $this->details = $details;
 
         return $this;
     }
