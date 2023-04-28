@@ -46,12 +46,6 @@ class House
     #[ORM\Column]
     private ?int $floors = null;
 
-    #[ORM\Column]
-    private ?int $parkingSpace = null;
-
-    // #[ORM\OneToOne(targetEntity: Location::class, inversedBy: 'house')]
-    // private ?Location $location = null;
-
     public function __construct()
     {
         $this->feature = new ArrayCollection();
@@ -209,15 +203,4 @@ class House
         return $this;
     }
 
-    public function getParkingSpace(): ?int
-    {
-        return $this->parkingSpace;
-    }
-
-    public function setParkingSpace(int $parkingSpace): self
-    {
-        $this->parkingSpace = $parkingSpace;
-
-        return $this;
-    }
 }

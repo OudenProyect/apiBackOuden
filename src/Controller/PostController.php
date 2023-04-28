@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\House;
+use App\Repository\CompanyRepository;
 use App\Repository\HouseRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostController extends AbstractController
 {
     #[Route('/post', name: 'app_post', methods: 'POST')]
-    public function index(Request $request, HouseRepository $houserepo): JsonResponse
+    public function index(Request $request, HouseRepository $houserepo,CompanyRepository $company): JsonResponse
     {
         $datos = [];
         try {
@@ -26,6 +27,14 @@ class PostController extends AbstractController
             }
             // post
             try{
+                // buscamos empresa
+                $empresa = $company->find($request->get('empresa'));
+
+                if(!$empresa){
+                    throw new Exception('Error codigo de empresa', 400);
+                }
+
+                // crear casa
                 $titulo = $request->get('titulo');
                 $precio = $request->get('precio');
                 $descripcionPortada = $request->get('descripcionPortada');
@@ -42,6 +51,15 @@ class PostController extends AbstractController
                 $swimmingPool = $request->get('swimmingPool');
                 $Barcelona = $request->get('Barcelona');
                 $Girona = $request->get('Girona');
+
+                $house = new House();
+                $house->setType($tipo);
+                $house->setNBedrooms($bedrooms);
+                $house->setToilets($bathroom);
+                $house->setM2($m2);
+                $house->setPrice($precio);
+                $house->setUsefulLivinArea($m2util);
+                $house->setFloors($flats);
 
     
             }catch(Exception $e){
