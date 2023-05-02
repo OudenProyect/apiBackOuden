@@ -14,11 +14,11 @@ class Image
     #[ORM\Column]
     private ?int $id = null;
 
-    
+
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'images')]
+    #[ORM\ManyToOne(inversedBy: 'images', cascade: ["persist"])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Publication $publication = null;
 

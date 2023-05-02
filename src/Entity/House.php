@@ -26,9 +26,6 @@ class House
     private ?int $toilets = null;
 
     #[ORM\Column]
-    private ?int $m2 = null;
-
-    #[ORM\Column]
     private ?float $price = null;
 
     #[ORM\ManyToMany(targetEntity: Feature::class, inversedBy: 'houses')]
@@ -89,19 +86,6 @@ class House
     public function setToilets(int $toilets): self
     {
         $this->toilets = $toilets;
-
-        return $this;
-    }
-
-
-    public function getM2(): ?int
-    {
-        return $this->m2;
-    }
-
-    public function setM2(int $m2): self
-    {
-        $this->m2 = $m2;
 
         return $this;
     }
@@ -202,5 +186,4 @@ class House
 
         return $this;
     }
-
 }

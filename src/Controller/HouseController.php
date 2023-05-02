@@ -8,6 +8,7 @@ use App\Repository\HouseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class HouseController extends AbstractController
 {
@@ -27,5 +28,17 @@ class HouseController extends AbstractController
             }
         }
         return $this->json($tipos);
+    }
+
+    #[Route('/extras', name: 'app_extras', methods: 'GET')]
+    public function extras(FeatureRepository $feature): JsonResponse
+    {
+
+        return $this->json(
+            $feature->findAll(),
+            200,
+            [],
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['houses']]
+        );
     }
 }
