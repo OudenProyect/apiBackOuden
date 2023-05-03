@@ -25,27 +25,23 @@ class SearchController extends AbstractController
         $result = [];
 
         try {
-            $locats = $services->findBy(['name' => $search->get('ubicacion')]);
+            if($search->get('ubicacion') != 'all'){
+                $locats = $services->findBy(['name' => $search->get('ubicacion')]);
 
-            if (count($locats[0]->getHouses()) > 0) {
-                foreach ($locats[0]->getHouses() as $h) {
-                    // dd($publication->findBy(['house' => $h->getId()]));
-                    $publi = $publication->findBy(['house' => $h->getId()]);
-                    // dd($publi);
-                    $result[] = $publi;
+                // buscamos en los servicios las casas relacionadas con la ubicacion y buscamos la publicacion
+                if (count($locats[0]->getHouses()) > 0) {
+                    foreach ($locats[0]->getHouses() as $h) {
+                        $publi = $publication->findBy(['house' => $h->getId()]);
+                        $result = array_merge($result, $publi);
+                    }
+                }else{
+                    $result = 'No hay casas en esta ubicacion';
                 }
+            }else{
+                $result = $publication->findAll();
             }
+            
 
-            // if (count($locats[0]) > 0) {
-            //     foreach ($publication->findAll() as $publi) {
-            //         foreach ($publi->getHouse()->getAreaServices() as $service) {
-            //             if (strtolower($service->getName()) == strtolower($search->get('ubicacion'))) {
-            //                 // devolvemos la publicacion con todos sus datos de la casas etc
-            //                 $result[] = $publi;
-            //             }
-            //         }
-            //     }
-            // }
         } catch (Exception $e) {
         }
         return $this->json(
