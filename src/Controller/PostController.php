@@ -156,8 +156,6 @@ class PostController extends AbstractController
                 $pos->save($publicacion, true);
                 $imgrepo->save($image, true);
 
-
-
                 $files->move(
                     $this->getParameter('image_dir'), // Directorio de destino configurado en config/services.yaml
                     $fileName
