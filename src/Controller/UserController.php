@@ -16,16 +16,20 @@ use Symfony\Flex\Response as FlexResponse;
 
 class UserController extends AbstractController
 {
-    #[Route('/delete/{id}', name: 'delete.user', methods: 'DELETE')]
-    public function deleteUser(UserRepository $repo, int $id): JsonResponse
-    {
-        $user = $repo->find($id);
-        $message = "usuario no encontrado";
-        if ($user != null) {
-            $repo->remove($user, true);
-            $message = "usuario eliminado";
+    #[Route('/api/delete', name: 'delete.user', methods: 'DELETE')]
+    public function deleteUser(
+        UserRepository $repo,
+        TokenStorageInterface $token
+    ): JsonResponse {
+        try {
+            $email = $token->getToken()->getUserIdentifier();
+            $user = $repo->findBy(['email' => $email]);
+            $repo->remove($user[0], true);
+        } catch (Exception $e) {
+            $e->getMessage();
         }
-        return $this->json($message);
+
+        return $this->json($user);
     }
 
     // ruta protegida
@@ -44,7 +48,9 @@ class UserController extends AbstractController
                         case 'name':
                             $user->setName($data['value']);
                             break;
-
+                        case 'nickname':
+                            $user->setNickname($data['value']);
+                            break;
                         case 'phone';
                             $user->setPhone((int)$data['value']);
                             break;

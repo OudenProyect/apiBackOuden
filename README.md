@@ -12,3 +12,7 @@
 ### Crear claves de JWT (Token)
 
 - `php bin/console lexik:jwt:generate-keypair` (Crea una carpeta config/jwt con las claves privada y pública)
+- 
+
+### INSTALACION CORS
+`composer require nelmio/cors-bundle`

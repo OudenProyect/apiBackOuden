@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\LocationServices;
 use App\Repository\HouseRepository;
 use App\Repository\LocationRepository;
+use App\Repository\LocationServicesRepository;
 use App\Repository\PublicationRepository;
 use App\Repository\UserRepository;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,32 +20,38 @@ class SearchController extends AbstractController
 {
     // Busqueda de casas por provincia o region
     #[Route('/search', name: 'app_search')]
-    public function index(HouseRepository $cas, Request $search, LocationRepository $locations): JsonResponse
+    public function index(LocationServicesRepository $services, Request $search, PublicationRepository $publication): JsonResponse
     {
-        $casas = [];
-        $codigo = Response::HTTP_OK;
-        //buscar resultados
-        $locats = $locations->findBy(['province' => $search->get('ubicacion')]);
-        if (count($locats) === 0) {
-            $locats = count($locations->findBy(['region' => $search->get('ubicacion')])) != 0 ? $locations->findBy(['region' => $search->get('ubicacion')]) : null;
-        }
+        $result = [];
 
+        try {
+            if($search->get('ubicacion') != 'all'){
+                $locats = $services->findBy(['name' => $search->get('ubicacion')]);
 
-        // si los hay , consulta las casas de acuerdo al nombre de la localizacion
-        if ($locats != null) {
-            foreach ($locats as $casa => $va) {
-                $bsq = $cas->findBy(['location' => $va->getId()]);
-                $casas[] = $bsq[0];
+                // buscamos en los servicios las casas relacionadas con la ubicacion y buscamos la publicacion
+                if (count($locats[0]->getHouses()) > 0) {
+                    foreach ($locats[0]->getHouses() as $h) {
+                        $publi = $publication->findBy(['house' => $h->getId()]);
+                        $result = array_merge($result, $publi);
+                    }
+                }else{
+                    $result = 'No hay casas en esta ubicacion';
+                }
+            }else{
+                $result = $publication->findAll();
             }
-        }
+            
 
+        } catch (Exception $e) {
+        }
         return $this->json(
-            $casas,
-            $codigo,
+            $result,
+            200,
             [],
-            [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
-                return 'self';
-            }]
+            // [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            //     return 'self';
+            // }]
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses']]
         );
     }
 

@@ -43,11 +43,14 @@ class Publication
     #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Video::class)]
     private Collection $videos;
 
-    #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Image::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'publication', targetEntity: Image::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $images;
 
     #[ORM\OneToOne(targetEntity: House::class, cascade: ['persist', 'remove'])]
     private ?House $house = null;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $details = null;
 
     public function __construct()
     {
@@ -247,6 +250,18 @@ class Publication
     public function setHouse(?House $house): self
     {
         $this->house = $house;
+
+        return $this;
+    }
+
+    public function getDetails(): ?string
+    {
+        return $this->details;
+    }
+
+    public function setDetails(string $details): self
+    {
+        $this->details = $details;
 
         return $this;
     }
