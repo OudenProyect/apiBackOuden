@@ -30,95 +30,91 @@ class PostController extends AbstractController
         try {
             // IMAGEN
             $uploadedFiles = $request->files->all(); // Obtener el archivo cargado del formulario
-
             if (!$uploadedFiles) {
                 throw new FileException('No se ha seleccionado ningún archivo');
             }
 
             // post
-            try {
-                // buscamos empresa
-                $empresa = $company->find($request->get('empresa'));
 
-                if (!$empresa) {
-                    throw new Exception('Error codigo de empresa', 400);
-                }
+            // buscamos empresa
+            $empresa = $company->find($request->get('empresa'));
 
-                // crear casa
-                $titulo = $request->get('titulo');
-                $precio = $request->get('precio');
-                $descripcionPortada = $request->get('descripcionPortada');
-                $descripcion = $request->get('descripcion');
-                $tipo = $request->get('tipo');
-                $bedrooms = $request->get('bedrooms');
-                $bathroom = $request->get('bathroom');
-                $flats = $request->get('flats');
-                $m2 = $request->get('m2');
-                $m2util = $request->get('m2util');
-
-                // extras
-                $jardin = $request->get('jardin');
-                $balcony = $request->get('balcon');
-                $terrace = $request->get('terrazaa');
-                $swimmingPool = $request->get('piscina');
-                $parking = $request->get('parking');
-                $chimney = $request->get('chimenea');
-                $storageroom = $request->get('trastero');
-
-                //locations
-                $Barcelona = $request->get('Barcelona');
-                $Girona = $request->get('Girona');
-
-                $house = new House();
-                $house->setType($tipo);
-                $house->setNBedrooms($bedrooms);
-                $house->setToilets($bathroom);
-                $house->setPrice($precio);
-                $house->setUsefulLivinArea($m2util);
-                // el metro de toda la casa
-                $house->setBuildedSurface($m2);
-                $house->setFloors($flats);
-
-                //añadimos las caracteristicas
-                if ($parking) {
-                    $house->addFeature($feact->find($parking));
-                }
-                if ($balcony) {
-                    $house->addFeature($feact->find($balcony));
-                }
-                if ($terrace) {
-                    $house->addFeature($feact->find($terrace));
-                }
-                if ($swimmingPool) {
-                    $house->addFeature($feact->find($swimmingPool));
-                }
-                if ($jardin) {
-                    $house->addFeature($feact->find($jardin));
-                }
-                if ($chimney) {
-                    $house->addFeature($feact->find($chimney));
-                }
-                if ($storageroom) {
-                    $house->addFeature($feact->find($storageroom));
-                }
-
-                //añadimos servicios
-
-                if ($Barcelona && $service->findBy(['name' => $Barcelona])) {
-
-                    $locat = $service->findBy(['name' => $Barcelona]);
-                    $house->addAreaService($locat[0]);
-                }
-
-                if ($Girona && $service->findBy(['name' => $Girona])) {
-                    $locat = $service->findBy(['name' => $Girona]);
-                    $house->addAreaService($locat[0]);
-                }
-
-                // $houserepo->save($house, true);
-            } catch (Exception $e) {
-                $datos[] = $e->getMessage();
+            if (!$empresa) {
+                throw new Exception('Error codigo de empresa', 400);
             }
+
+            // crear casa
+            $titulo = $request->get('titulo');
+            $precio = $request->get('precio');
+            $descripcionPortada = $request->get('descripcionPortada');
+            $descripcion = $request->get('descripcion');
+            $tipo = $request->get('tipo');
+            $bedrooms = $request->get('bedrooms');
+            $bathroom = $request->get('bathroom');
+            $flats = $request->get('flats');
+            $m2 = $request->get('m2');
+            $m2util = $request->get('m2util');
+
+            // extras
+            $jardin = $request->get('jardin');
+            $balcony = $request->get('balcon');
+            $terrace = $request->get('terrazaa');
+            $swimmingPool = $request->get('piscina');
+            $parking = $request->get('parking');
+            $chimney = $request->get('chimenea');
+            $storageroom = $request->get('trastero');
+
+            //locations
+            $Barcelona = $request->get('Barcelona');
+            $Girona = $request->get('Girona');
+
+            $house = new House();
+            $house->setType($tipo);
+            $house->setNBedrooms($bedrooms);
+            $house->setToilets($bathroom);
+            $house->setPrice($precio);
+            $house->setUsefulLivinArea($m2util);
+            // el metro de toda la casa
+            $house->setBuildedSurface($m2);
+            $house->setFloors($flats);
+
+            //añadimos las caracteristicas
+            if ($parking) {
+                $house->addFeature($feact->find($parking));
+            }
+            if ($balcony) {
+                $house->addFeature($feact->find($balcony));
+            }
+            if ($terrace) {
+                $house->addFeature($feact->find($terrace));
+            }
+            if ($swimmingPool) {
+                $house->addFeature($feact->find($swimmingPool));
+            }
+            if ($jardin) {
+                $house->addFeature($feact->find($jardin));
+            }
+            if ($chimney) {
+                $house->addFeature($feact->find($chimney));
+            }
+            if ($storageroom) {
+                $house->addFeature($feact->find($storageroom));
+            }
+
+            //añadimos servicios
+
+            if ($Barcelona && $service->findBy(['name' => $Barcelona])) {
+
+                $locat = $service->findBy(['name' => $Barcelona]);
+                $house->addAreaService($locat[0]);
+            }
+
+            if ($Girona && $service->findBy(['name' => $Girona])) {
+                $locat = $service->findBy(['name' => $Girona]);
+                $house->addAreaService($locat[0]);
+            }
+
+            // $houserepo->save($house, true);
 
             // crear publicacion
             $publicacion = new Publication();
@@ -168,11 +164,9 @@ class PostController extends AbstractController
                     'fileName' => $fileName
                 ];
             }
-
-            dd('creado');
         } catch (FileException $e) {
             // Manejar errores de carga de archivos
-            throw new \Exception('Ha ocurrido un error al subir el archivo' . $e->getMessage());
+            throw new \Exception($e->getMessage());
         }
 
 
