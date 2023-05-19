@@ -17,7 +17,7 @@ class Company
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 9)]
+    #[ORM\Column(length: 9, unique:true, nullable:false)]
     private ?string $Cif_company = null;
 
     #[ORM\Column(length: 100)]

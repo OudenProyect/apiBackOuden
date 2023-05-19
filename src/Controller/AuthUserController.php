@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Company;
 use App\Entity\User;
+use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AuthUserController extends AbstractController
@@ -40,7 +43,9 @@ class AuthUserController extends AbstractController
     {
         return $this->json([
             'user' => $tokenStorage->getToken()->getUser()
-        ]);
+        ],200, [],[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            return 'self';
+        }]);
     }
 
     // creacion nuevo usuario
@@ -65,5 +70,57 @@ class AuthUserController extends AbstractController
         }
 
         return $this->json($user, $codigo);
+    }
+
+
+
+    #[Route('/register', name: 'app_auth_userr', methods: 'POST')]
+    public function registerCompany(Request $request, CompanyRepository $comp, UserRepository $users, UserPasswordHasherInterface $hash): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent());
+            $codigo = Response::HTTP_BAD_REQUEST;
+
+            // Verificar si el email ya está en uso
+            $existingUser = $users->findOneBy(['email' => $data->email]);
+            if ($existingUser) {
+                throw new \Exception('El email ya está en uso');
+            }
+
+            // Verificar si el cif empresa ya está en uso
+            $existingCompany = $comp->findOneBy(['Cif_company' => $data->cifEmpresa]);
+            if ($existingCompany) {
+                throw new \Exception('El cif empresa ya está en uso');
+            }
+
+            // Si no hay duplicados, crear los registros
+            $user  = new User();
+            $user->setName($data->usuario);
+            $user->setEmail($data->email);
+            $user->setRoles([]);
+            $hashed = $hash->hashPassword($user, $data->password);
+            $user->setPassword($hashed);
+            $user->setPhone($data->phone);
+
+            $company  = new Company();
+            $company->setName($data->nombreEmpresa);
+            $company->setCifCompany($data->cifEmpresa);
+            $company->setLinkWeb($data->linkPagina);
+            $company->setLocation($data->localizacionEmpresa);
+            $company->setDescription($data->descripcion);
+            $company->setPhone($data->phone);
+            $comp->save($company, true);
+
+            $user->setCifCompany($company);
+            $users->save($user, true);
+
+            $codigo = Response::HTTP_OK;
+        } catch (\Exception $e) {
+            $user=$e->getMessage();
+        }
+
+        return $this->json($user, $codigo, [],[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            return 'self';
+        }]);
     }
 }
