@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Company;
+use App\Entity\House;
 use App\Entity\LocationServices;
 use App\Repository\HouseRepository;
 use App\Repository\LocationRepository;
@@ -48,10 +50,13 @@ class SearchController extends AbstractController
             $result,
             200,
             [],
-            // [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
-            //     return 'self';
-            // }]
-            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses']]
+            [
+                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                },
+                AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses',]
+            ]
+            // [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'user', 'house']]
         );
     }
 
@@ -109,15 +114,23 @@ class SearchController extends AbstractController
                 ->setParameter('surfacemax', (int) $surfacemax);
         }
 
-        if (count($extras) > 0) {
+        if (count($extras) > 1) {
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->in('he.id', $extras)
             )
                 ->groupBy('p.id')
                 ->having($queryBuilder->expr()->eq($queryBuilder->expr()->countDistinct('he.id'), 2));
+        } else if (count($extras) == 1) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in('he.id', $extras)
+            )
+                ->groupBy('p.id')
+                ->having($queryBuilder->expr()->eq($queryBuilder->expr()->countDistinct('he.id'), 1));
         }
+
         $query = $queryBuilder->getQuery()->getResult();
 
+        //busca en todas las publicaciones, para devolver ya teniendo el id de las casas
         if (count($query) > 0) {
             foreach ($query as $casa) {
                 $casaid = $casa->getId();
@@ -125,15 +138,32 @@ class SearchController extends AbstractController
                 if (count($p) > 0) {
                     $res = array_merge($res, $p);
                 }
-                //     $publi = $publication->findBy(['house' => $h->getId()]);
-                //     $result = array_merge($result, $publi);
             }
         }
-
 
         // returns an array of Product objects
         return $this->json(
             $res,
+            200,
+            [],
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses', 'user']]
+            // [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            //     return 'self';
+            // }]
+        );
+    }
+
+    #[Route('/publicacion', name: 'app_publication')]
+    public function publicacion(Request $req, PublicationRepository $pub)
+    {
+        $id = $req->get('id');
+        $publicacion = $pub->find($id);
+        if (!$publicacion) {
+            $publicacion = 'No existe esa publicacion con el id';
+        }
+        // returns an array of Product objects
+        return $this->json(
+            $publicacion,
             200,
             [],
             [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses']]

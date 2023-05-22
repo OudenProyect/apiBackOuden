@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use phpDocumentor\Reflection\DocBlock\Serializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AuthUserController extends AbstractController
@@ -36,11 +39,32 @@ class AuthUserController extends AbstractController
     // ruta para coger al usuario por el token
     // las rutas protegidas inician con el prefijo /api
     #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
-    public function index(TokenStorageInterface $tokenStorage): JsonResponse
+    public function index(TokenStorageInterface $tokenStorage, SerializerInterface $serializer): JsonResponse
     {
-        return $this->json([
-            'user' => $tokenStorage->getToken()->getUser()
+        $user = $tokenStorage->getToken()->getUser();
+        $serializedUser = $serializer->serialize($user, 'json', [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications']
         ]);
+
+
+        return new JsonResponse($serializedUser, 200, [], true);
+
+        // return $this->json([
+        //     'user' => $tokenStorage->getToken()->getUser(),
+        //     200,
+        //     [],
+        //     [
+        //         AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 2,
+
+        //         AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+        //             return $object->getId();
+        //         },
+        //         AbstractNormalizer::IGNORED_ATTRIBUTES => ['user', 'users', 'publications']
+        //     ]
+        // ]);
     }
 
     // creacion nuevo usuario

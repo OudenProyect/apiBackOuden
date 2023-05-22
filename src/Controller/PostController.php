@@ -56,13 +56,13 @@ class PostController extends AbstractController
             $m2util = $request->get('m2util');
 
             // extras
-            $jardin = $request->get('jardin');
-            $balcony = $request->get('balcon');
-            $terrace = $request->get('terrazaa');
-            $swimmingPool = $request->get('piscina');
+            $jardin = $request->get('garden');
+            $heating = $request->get('heating');
+            $balcon = $request->get('balcony');
+            $swimmingPool = $request->get('swimmingPool');
             $parking = $request->get('parking');
-            $chimney = $request->get('chimenea');
-            $storageroom = $request->get('trastero');
+            $chimney = $request->get('chimney');
+            $storageroom = $request->get('storage_room');
 
             //locations
             $Barcelona = $request->get('Barcelona');
@@ -82,11 +82,11 @@ class PostController extends AbstractController
             if ($parking) {
                 $house->addFeature($feact->find($parking));
             }
-            if ($balcony) {
-                $house->addFeature($feact->find($balcony));
+            if ($heating) {
+                $house->addFeature($feact->find($heating));
             }
-            if ($terrace) {
-                $house->addFeature($feact->find($terrace));
+            if ($balcon) {
+                $house->addFeature($feact->find($balcon));
             }
             if ($swimmingPool) {
                 $house->addFeature($feact->find($swimmingPool));
@@ -104,7 +104,6 @@ class PostController extends AbstractController
             //añadimos servicios
 
             if ($Barcelona && $service->findBy(['name' => $Barcelona])) {
-
                 $locat = $service->findBy(['name' => $Barcelona]);
                 $house->addAreaService($locat[0]);
             }
