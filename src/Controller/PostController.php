@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class PostController extends AbstractController
 {
@@ -177,43 +178,64 @@ class PostController extends AbstractController
     }
 
     #[Route('/api/favorite', name: 'app_favorit', methods: 'POST')]
-    public function addFavorite(Request $id,PublicationRepository $pub,TokenStorageInterface $token,UserRepository $ser
-    )
-    {
+    public function addFavorite(
+        Request $id,
+        PublicationRepository $pub,
+        TokenStorageInterface $token,
+        UserRepository $ser
+    ) {
         $message = 'Añaddido a favoritos';
-        try{
+        try {
             $i = json_decode($id->getContent())->id;
             $email = $token->getToken()->getUserIdentifier();
-            $user = $ser->findOneBy(['email'=>$email]);
+            $user = $ser->findOneBy(['email' => $email]);
             $publicacion = $pub->find($i);
             $user->addFavoritPublication($publicacion);
-            $ser->save($user,true);
-        }catch(Exception $e){
+            $ser->save($user, true);
+        } catch (Exception $e) {
             $message = $e->getMessage();
         }
 
         return $this->json($i);
-        
     }
 
     #[Route('/api/remFavorite', name: 'app_favoritremove', methods: 'POST')]
-    public function removeFavorite(Request $id,PublicationRepository $pub,TokenStorageInterface $token,UserRepository $ser
-    )
-    {
+    public function removeFavorite(
+        Request $id,
+        PublicationRepository $pub,
+        TokenStorageInterface $token,
+        UserRepository $ser
+    ) {
         $message = 'Eliminado de favoritos';
-        try{
+        try {
             $i = json_decode($id->getContent())->id;
             $email = $token->getToken()->getUserIdentifier();
-            $user = $ser->findOneBy(['email'=>$email]);
+            $user = $ser->findOneBy(['email' => $email]);
             $publicacion = $pub->find($i);
             $user->removeFavoritPublication($publicacion);
-            $ser->save($user,true);
-        }catch(Exception $e){
+            $ser->save($user, true);
+        } catch (Exception $e) {
             $message = $e->getMessage();
         }
 
         return $this->json($message);
-        
     }
 
+    #[Route('/api/favorites', name: 'app_favorites', methods: 'GET')]
+    public function favorites(UserRepository $user, TokenStorageInterface $tok)
+    {
+        $email = $tok->getToken()->getUserIdentifier();
+        $e = $user->findOneBy(['email' => $email]);
+        $message = 'No hay favoritos';
+        $posts = $e->getFavoritPublications()->toArray();
+        if (count($posts) > 0) {
+            $message = $posts;
+        }
+        return $this->json($message, 200, [], [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'user', 'usersFavorit', 'houses']
+        ]);
+    }
 }
