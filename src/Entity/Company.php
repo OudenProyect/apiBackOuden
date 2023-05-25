@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Table(name: 'Companies')]
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
@@ -17,7 +18,7 @@ class Company
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 9)]
+    #[ORM\Column(length: 9, unique:true, nullable:false)]
     private ?string $Cif_company = null;
 
     #[ORM\Column(length: 100)]
@@ -50,7 +51,8 @@ class Company
     {
         return $this->id;
     }
-
+    
+    
     public function getCifCompany(): ?string
     {
         return $this->Cif_company;

@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Company;
 use App\Entity\User;
+use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use phpDocumentor\Reflection\DocBlock\Serializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,30 +44,11 @@ class AuthUserController extends AbstractController
     #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
     public function index(TokenStorageInterface $tokenStorage, SerializerInterface $serializer): JsonResponse
     {
-        $user = $tokenStorage->getToken()->getUser();
-        $serializedUser = $serializer->serialize($user, 'json', [
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return $object->getId();
-            },
-            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications']
-        ]);
-
-
-        return new JsonResponse($serializedUser, 200, [], true);
-
-        // return $this->json([
-        //     'user' => $tokenStorage->getToken()->getUser(),
-        //     200,
-        //     [],
-        //     [
-        //         AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 2,
-
-        //         AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-        //             return $object->getId();
-        //         },
-        //         AbstractNormalizer::IGNORED_ATTRIBUTES => ['user', 'users', 'publications']
-        //     ]
-        // ]);
+        return $this->json([
+            'user' => $tokenStorage->getToken()->getUser()
+        ], 200, [], [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            return 'self';
+        }]);
     }
 
     // creacion nuevo usuario
@@ -76,6 +59,12 @@ class AuthUserController extends AbstractController
             $data = json_decode($request->getContent());
             $codigo = Response::HTTP_BAD_REQUEST;
 
+            // Verificar si el email ya está en uso
+            $existingUser = $repo->findOneBy(['email' => $data->email]);
+            if ($existingUser) {
+                throw new \Exception('El email ya está en uso');
+            }
+
             $user  = new User();
             $user->setName($data->usuario);
             $user->setEmail($data->email);
@@ -85,11 +74,60 @@ class AuthUserController extends AbstractController
             $repo->save($user, true);
             $codigo = Response::HTTP_OK;
         } catch (\Exception $e) {
-            // Otro tipo de excepción
-            $user = "Este email ya esta registrado";
-            $codigo = Response::HTTP_INTERNAL_SERVER_ERROR;
+            $user = $e->getMessage();
+            // $user = "El email ya esta registrado";
         }
 
         return $this->json($user, $codigo);
+    }
+
+    #[Route('/register', name: 'app_auth_userr', methods: 'POST')]
+    public function registerCompany(Request $request, CompanyRepository $comp, UserRepository $users, UserPasswordHasherInterface $hash): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent());
+            $codigo = Response::HTTP_BAD_REQUEST;
+
+            // Verificar si el email ya está en uso
+            $existingUser = $users->findOneBy(['email' => $data->email]);
+            if ($existingUser) {
+                throw new \Exception('El email ya está en uso');
+            }
+
+            // Verificar si el cif empresa ya está en uso
+            $existingCompany = $comp->findOneBy(['Cif_company' => $data->cifEmpresa]);
+            if ($existingCompany) {
+                throw new \Exception('El cif empresa ya está en uso');
+            }
+
+            // Si no hay duplicados, crear los registros
+            $user  = new User();
+            $user->setName($data->usuario);
+            $user->setEmail($data->email);
+            $user->setRoles([]);
+            $hashed = $hash->hashPassword($user, $data->password);
+            $user->setPassword($hashed);
+            $user->setPhone($data->phone);
+
+            $company  = new Company();
+            $company->setName($data->nombreEmpresa);
+            $company->setCifCompany($data->cifEmpresa);
+            $company->setLinkWeb($data->linkPagina);
+            $company->setLocation($data->localizacionEmpresa);
+            $company->setDescription($data->descripcion);
+            $company->setPhone($data->phone);
+            $comp->save($company, true);
+
+            $user->setCifCompany($company);
+            $users->save($user, true);
+
+            $codigo = Response::HTTP_OK;
+        } catch (\Exception $e) {
+            $user = $e->getMessage();
+        }
+
+        return $this->json($user, $codigo, [], [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+            return 'self';
+        }]);
     }
 }
