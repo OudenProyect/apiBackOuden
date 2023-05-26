@@ -142,15 +142,21 @@ class SearchController extends AbstractController
         }
 
         // returns an array of Product objects
-        return $this->json(
-            $res,
-            200,
-            [],
-            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses', 'user']]
-            // [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
-            //     return 'self';
-            // }]
-        );
+        return $this->json($res, 200, [], [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses', 'user']
+        ]);
+        // return $this->json(
+        //     $res,
+        //     200,
+        //     [],
+        //     [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses', 'user']]
+        //     // [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+        //     //     return 'self';
+        //     // }]
+        // );
     }
 
     #[Route('/publicacion', name: 'app_publication')]
