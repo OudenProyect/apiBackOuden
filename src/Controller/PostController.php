@@ -11,6 +11,7 @@ use App\Repository\HouseRepository;
 use App\Repository\ImageRepository;
 use App\Repository\LocationServicesRepository;
 use App\Repository\PublicationRepository;
+use App\Repository\UserRepository;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -19,7 +20,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class PostController extends AbstractController
 {
@@ -56,13 +60,13 @@ class PostController extends AbstractController
             $m2util = $request->get('m2util');
 
             // extras
-            $jardin = $request->get('jardin');
-            $balcony = $request->get('balcon');
-            $terrace = $request->get('terrazaa');
-            $swimmingPool = $request->get('piscina');
+            $jardin = $request->get('garden');
+            $heating = $request->get('heating');
+            $balcon = $request->get('balcony');
+            $swimmingPool = $request->get('swimmingPool');
             $parking = $request->get('parking');
-            $chimney = $request->get('chimenea');
-            $storageroom = $request->get('trastero');
+            $chimney = $request->get('chimney');
+            $storageroom = $request->get('storage_room');
 
             //locations
             $Barcelona = $request->get('Barcelona');
@@ -82,11 +86,11 @@ class PostController extends AbstractController
             if ($parking) {
                 $house->addFeature($feact->find($parking));
             }
-            if ($balcony) {
-                $house->addFeature($feact->find($balcony));
+            if ($heating) {
+                $house->addFeature($feact->find($heating));
             }
-            if ($terrace) {
-                $house->addFeature($feact->find($terrace));
+            if ($balcon) {
+                $house->addFeature($feact->find($balcon));
             }
             if ($swimmingPool) {
                 $house->addFeature($feact->find($swimmingPool));
@@ -104,7 +108,6 @@ class PostController extends AbstractController
             //añadimos servicios
 
             if ($Barcelona && $service->findBy(['name' => $Barcelona])) {
-
                 $locat = $service->findBy(['name' => $Barcelona]);
                 $house->addAreaService($locat[0]);
             }
@@ -175,4 +178,65 @@ class PostController extends AbstractController
     }
 
     
+    #[Route('/api/favorite', name: 'app_favorit', methods: 'POST')]
+    public function addFavorite(
+        Request $id,
+        PublicationRepository $pub,
+        TokenStorageInterface $token,
+        UserRepository $ser
+    ) {
+        $message = 'Añaddido a favoritos';
+        try {
+            $i = json_decode($id->getContent())->id;
+            $email = $token->getToken()->getUserIdentifier();
+            $user = $ser->findOneBy(['email' => $email]);
+            $publicacion = $pub->find($i);
+            $user->addFavoritPublication($publicacion);
+            $ser->save($user, true);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        return $this->json($i);
+    }
+
+    #[Route('/api/remFavorite', name: 'app_favoritremove', methods: 'POST')]
+    public function removeFavorite(
+        Request $id,
+        PublicationRepository $pub,
+        TokenStorageInterface $token,
+        UserRepository $ser
+    ) {
+        $message = 'Eliminado de favoritos';
+        try {
+            $i = json_decode($id->getContent())->id;
+            $email = $token->getToken()->getUserIdentifier();
+            $user = $ser->findOneBy(['email' => $email]);
+            $publicacion = $pub->find($i);
+            $user->removeFavoritPublication($publicacion);
+            $ser->save($user, true);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        return $this->json($message);
+    }
+
+    #[Route('/api/favorites', name: 'app_favorites', methods: 'GET')]
+    public function favorites(UserRepository $user, TokenStorageInterface $tok)
+    {
+        $email = $tok->getToken()->getUserIdentifier();
+        $e = $user->findOneBy(['email' => $email]);
+        $message = 'No hay favoritos';
+        $posts = $e->getFavoritPublications()->toArray();
+        if (count($posts) > 0) {
+            $message = $posts;
+        }
+        return $this->json($message, 200, [], [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'user', 'usersFavorit', 'houses']
+        ]);
+    }
 }

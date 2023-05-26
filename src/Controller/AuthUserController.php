@@ -6,14 +6,17 @@ use App\Entity\Company;
 use App\Entity\User;
 use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
+use phpDocumentor\Reflection\DocBlock\Serializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AuthUserController extends AbstractController
@@ -39,11 +42,11 @@ class AuthUserController extends AbstractController
     // ruta para coger al usuario por el token
     // las rutas protegidas inician con el prefijo /api
     #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
-    public function index(TokenStorageInterface $tokenStorage): JsonResponse
+    public function index(TokenStorageInterface $tokenStorage, SerializerInterface $serializer): JsonResponse
     {
         return $this->json([
             'user' => $tokenStorage->getToken()->getUser()
-        ],200, [],[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+        ], 200, [], [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
             return 'self';
         }]);
     }
@@ -71,7 +74,7 @@ class AuthUserController extends AbstractController
             $repo->save($user, true);
             $codigo = Response::HTTP_OK;
         } catch (\Exception $e) {
-            $user=$e->getMessage();
+            $user = $e->getMessage();
             // $user = "El email ya esta registrado";
         }
 
@@ -84,19 +87,19 @@ class AuthUserController extends AbstractController
         try {
             $data = json_decode($request->getContent());
             $codigo = Response::HTTP_BAD_REQUEST;
-    
+
             // Verificar si el email ya está en uso
             $existingUser = $users->findOneBy(['email' => $data->email]);
             if ($existingUser) {
                 throw new \Exception('El email ya está en uso');
             }
-    
+
             // Verificar si el cif empresa ya está en uso
             $existingCompany = $comp->findOneBy(['Cif_company' => $data->cifEmpresa]);
             if ($existingCompany) {
                 throw new \Exception('El cif empresa ya está en uso');
             }
-    
+
             // Si no hay duplicados, crear los registros
             $user  = new User();
             $user->setName($data->usuario);
@@ -105,7 +108,7 @@ class AuthUserController extends AbstractController
             $hashed = $hash->hashPassword($user, $data->password);
             $user->setPassword($hashed);
             $user->setPhone($data->phone);
-            
+
             $company  = new Company();
             $company->setName($data->nombreEmpresa);
             $company->setCifCompany($data->cifEmpresa);
@@ -114,16 +117,16 @@ class AuthUserController extends AbstractController
             $company->setDescription($data->descripcion);
             $company->setPhone($data->phone);
             $comp->save($company, true);
-    
+
             $user->setCifCompany($company);
             $users->save($user, true);
-    
+
             $codigo = Response::HTTP_OK;
         } catch (\Exception $e) {
-            $user=$e->getMessage();
+            $user = $e->getMessage();
         }
-    
-        return $this->json($user, $codigo, [],[AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
+
+        return $this->json($user, $codigo, [], [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function () {
             return 'self';
         }]);
     }
