@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Flex\Response as FlexResponse;
 
 class UserController extends AbstractController
@@ -29,7 +30,7 @@ class UserController extends AbstractController
             $e->getMessage();
         }
 
-        return $this->json($user);
+        return $this->json($user, 200, [], [AbstractNormalizer::IGNORED_ATTRIBUTES => ['user']]);
     }
 
     // ruta protegida
@@ -72,7 +73,7 @@ class UserController extends AbstractController
             $e->getMessage();
         }
 
-        return $this->json($name);
+        return $this->json(['user' => $name], 200, [], [AbstractNormalizer::IGNORED_ATTRIBUTES => ['user']]);
     }
 
     #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]

@@ -162,11 +162,11 @@ class SearchController extends AbstractController
             $publicacion = 'No existe esa publicacion con el id';
         }
         // returns an array of Product objects
-        return $this->json(
-            $publicacion,
-            200,
-            [],
-            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses']]
-        );
+        return $this->json($publicacion, 200, [], [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'publication', 'houses', 'usersFavorit']
+        ]);
     }
 }
