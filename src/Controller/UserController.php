@@ -73,7 +73,13 @@ class UserController extends AbstractController
             $e->getMessage();
         }
 
-        return $this->json(['user' => $name], 200, [], [AbstractNormalizer::IGNORED_ATTRIBUTES => ['user']]);
+        return $this->json(['user' => $user], 200, [], [
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+            AbstractNormalizer::IGNORED_ATTRIBUTES => ['publications', 'user', 'usersFavorit', 'houses']
+        ]);
+        // return $this->json(['user' => $name], 200, [], [AbstractNormalizer::IGNORED_ATTRIBUTES => ['user']]);
     }
 
     #[Route('/api/changeUserPwd', name: 'app_change_pass', methods: 'PUT')]
