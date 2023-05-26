@@ -37,9 +37,6 @@ class PostController extends AbstractController
             if (!$uploadedFiles) {
                 throw new FileException('No se ha seleccionado ningún archivo');
             }
-
-            // post
-
             // buscamos empresa
             $empresa = $company->find($request->get('empresa'));
 
@@ -171,8 +168,6 @@ class PostController extends AbstractController
             // Manejar errores de carga de archivos
             throw new \Exception($e->getMessage());
         }
-
-
 
         return $this->json($datos);
     }
