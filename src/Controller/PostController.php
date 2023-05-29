@@ -191,7 +191,7 @@ class PostController extends AbstractController
             $message = $e->getMessage();
         }
 
-        return $this->json($i);
+        return $this->json($message);
     }
 
     #[Route('/api/remFavorite', name: 'app_favoritremove', methods: 'POST')]
