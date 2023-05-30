@@ -16,3 +16,48 @@
 
 ### INSTALACION CORS
 `composer require nelmio/cors-bundle`
+
+### BASE DE DATOS INSERTAR
+- en la tabla de features, se debe insertar los parametros por el que se filtraran, en primera son:
+        - parking
+        - balcony
+        - Swimming pool
+        - Fireplace
+        - Storage room
+        - Garden
+
+        {
+      id: 7,
+      name: 'parking',
+      des: 'Parking',
+    },
+    {
+      id: 10,
+      name: 'balcon',
+      des: 'Balcony',
+    },
+    {
+      id: 8,
+      name: 'piscina',
+      des: 'Swimming pool',
+    },
+    {
+      id: 12,
+      name: 'terraza',
+      des: 'Fireplace',
+    },
+    {
+      id: 11,
+      name: 'trastero',
+      des: 'Storage room',
+    },
+    {
+      id: 14,
+      name: 'jardin',
+      des: 'Garden',
+    },
+    {
+      id: 7,
+      name: 'calentador',
+      des: 'Heater',
+    }

@@ -58,12 +58,12 @@ class PostController extends AbstractController
 
             // extras
             $jardin = $request->get('garden');
-            $heating = $request->get('heating');
+            $terrace = $request->get('terrace');
             $balcon = $request->get('balcony');
-            $swimmingPool = $request->get('swimmingPool');
+            $swimmingPool = $request->get('swimmingpool');
             $parking = $request->get('parking');
             $chimney = $request->get('chimney');
-            $storageroom = $request->get('storage_room');
+            $storageroom = $request->get('storageroom');
 
             //locations
             $Barcelona = $request->get('Barcelona');
@@ -83,8 +83,8 @@ class PostController extends AbstractController
             if ($parking) {
                 $house->addFeature($feact->find($parking));
             }
-            if ($heating) {
-                $house->addFeature($feact->find($heating));
+            if ($terrace) {
+                $house->addFeature($feact->find($terrace));
             }
             if ($balcon) {
                 $house->addFeature($feact->find($balcon));

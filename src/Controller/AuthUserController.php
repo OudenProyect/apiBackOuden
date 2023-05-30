@@ -22,23 +22,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class AuthUserController extends AbstractController
 {
 
-    // #[Route('/api/login', name: 'api_loginnn', methods: 'POST')]
-    // public function login(Request $request, HttpClientInterface $httpClient)
-    // {
-    //     try {
-    //         $content = json_decode($request->getContent(), true);
-    //         $response = $httpClient->request('POST', 'http://127.0.0.1:8000/api/login_check', ['body' => $content]);
-    //         return $this->json($response);
-    //     } catch (Exception $e) {
-    //         return $this->json([
-    //             'exceptionMessage' => $e->getMessage(),
-    //             'exception' => $e,
-    //             'message' => 'Email o contraseña incorrectos tetas'
-    //         ]);
-    //     }
-    // }
-
-
     // ruta para coger al usuario por el token
     // las rutas protegidas inician con el prefijo /api
     #[Route('/api/user', name: 'app_auth_userrrr', methods: 'GET')]
