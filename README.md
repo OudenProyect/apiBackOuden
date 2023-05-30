@@ -25,7 +25,14 @@
         - Fireplace
         - Storage room
         - Garden
+        - chimney
 
+- tabla services_location
+        - Girona
+        - Barcelona
+
+
+ejemplo
         {
       id: 7,
       name: 'parking',
