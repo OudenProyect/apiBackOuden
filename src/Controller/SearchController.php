@@ -106,6 +106,12 @@ class SearchController extends AbstractController
             $queryBuilder->andWhere('p.price BETWEEN :pricemin AND :pricemax')
                 ->setParameter('pricemin', $pricemin)
                 ->setParameter('pricemax', $pricemax);
+        } else if ($pricemin != 'Indiferent') {
+            $queryBuilder->andWhere('p.price = :pricemin')
+                ->setParameter('pricemin', $pricemin);
+        } else if ($pricemax != 'Indiferent') {
+            $queryBuilder->andWhere('p.price = :pricemax')
+                ->setParameter('pricemax', $pricemin);
         }
 
         if ($surfacemin != 'Indiferent' && $surfacemax != 'Indiferent') {
