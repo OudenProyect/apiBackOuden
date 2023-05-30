@@ -3,9 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Feature;
+use App\Entity\User;
+use App\Repository\ImageRepository;
 use App\Repository\UserRepository;
+use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,6 +49,7 @@ class UserController extends AbstractController
             $user = $repo->find($data['id']);
             if ($user) {
                 // Siempre se recibira el dato edit
+                log(isset($data['value']));
                 if (isset($data['value'])) {
                     switch ($data['edit']) {
                         case 'name':
@@ -57,6 +63,15 @@ class UserController extends AbstractController
                             break;
                         case 'cif_company';
                             $user->setCifCompany($data['value']);
+                            break;
+                        case 'company';
+                            $user->getCifCompany()->setName($data['value']);
+                            break;
+                        case 'linkWeb';
+                            $user->getCifCompany()->setLinkWeb($data['value']);
+                            break;
+                        case 'description';
+                            $user->getCifCompany()->setDescription($data['value']);
                             break;
                         default:
                             $name = "No se recibio el campo a cambiar";
@@ -108,4 +123,60 @@ class UserController extends AbstractController
         }
         return $this->json(['message' => $message]);
     }
+
+
+
+
+
+    #[Route('/avatarpost', name: 'avatarpost', methods: ['POST'])]
+    public function avatarpost(Request $request, ImageRepository $imgrepo, UserRepository $repo, Request $req): JsonResponse
+    {
+        $datos = [];
+
+        try {
+            // Obtener el ID del usuario del campo 'userId'
+            $userId = $req->request->get('userId');
+
+            $uploadedFiles = $request->files->all(); // Obtener el archivo cargado del formulario
+            if (!$uploadedFiles) {
+                throw new FileException('No se ha seleccionado ningún archivo');
+            }
+
+            // Resto del código para procesar los datos y crear las entidades
+
+            foreach ($uploadedFiles as $fieldName => $file) {
+                // Generar un nombre único para el archivo
+                $uniqueId = uniqid('', true);
+                $randomBytes = random_bytes(10);
+                $fileName = $uniqueId . '_' . bin2hex($randomBytes) . '.' . $file->guessExtension();
+
+                // Crear una nueva entidad Image y asignarle el nombre del archivo
+                $user = $repo->find($userId);
+                $user->setImgProfile($fileName);
+
+                // Mover el archivo al directorio de destino
+                $file->move(
+                    $this->getParameter('image_dir'), // Directorio de destino configurado en config/services.yaml
+                    $fileName
+                );
+
+                // Guardar la entidad Image en la base de datos
+                $repo->save($user, true);
+
+                $datos[] = [
+                    'img' => $fieldName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getClientMimeType(),
+                    'fileName' => $fileName
+                ];
+            }
+        } catch (FileException $e) {
+            // Manejar errores de carga de archivos
+            throw new \Exception($e->getMessage());
+        }
+
+        return $this->json($datos);
+    }
 }
+
+

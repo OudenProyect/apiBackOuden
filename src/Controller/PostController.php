@@ -172,6 +172,7 @@ class PostController extends AbstractController
         return $this->json($datos);
     }
 
+    
     #[Route('/api/favorite', name: 'app_favorit', methods: 'POST')]
     public function addFavorite(
         Request $id,
