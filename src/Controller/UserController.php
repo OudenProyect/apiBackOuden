@@ -163,12 +163,7 @@ class UserController extends AbstractController
                 // Guardar la entidad Image en la base de datos
                 $repo->save($user, true);
 
-                $datos[] = [
-                    'img' => $fieldName,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime_type' => $file->getClientMimeType(),
-                    'fileName' => $fileName
-                ];
+                $datos = ['fileName' => $fileName];
             }
         } catch (FileException $e) {
             // Manejar errores de carga de archivos
